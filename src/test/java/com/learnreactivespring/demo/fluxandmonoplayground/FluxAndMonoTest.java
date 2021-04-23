@@ -3,6 +3,7 @@ package com.learnreactivespring.demo.fluxandmonoplayground;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 public class FluxAndMonoTest {
@@ -70,4 +71,24 @@ public class FluxAndMonoTest {
                 .expectError(RuntimeException.class) //Expecting an error
                 .verify();
     }
+
+
+    @Test
+    public void monoTest(){
+       Mono<String> monoString = Mono.just("Spring");
+
+       StepVerifier.create(monoString.log())
+               .expectNext("Spring")
+               .verifyComplete(); //Expecting on Complete
+    }
+
+    @Test
+    public void monoTest_withError(){
+
+        //Mono can only contain one element
+        StepVerifier.create(Mono.error(new RuntimeException("Exception Occurred")))
+                .expectError(RuntimeException.class)
+                .verify();
+    }
+
 }
