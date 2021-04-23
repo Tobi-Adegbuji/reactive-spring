@@ -1,12 +1,14 @@
 package com.learnreactivespring.demo.fluxandmonoplayground;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 public class FluxAndMonoTest {
 
     @Test
-    public void fluxTest(){
+    public void fluxTest() {
         Flux<String> stringFlux = Flux.just("Spring", "Spring Boot", "Reactive Spring")
                 //.concatWith(Flux.error(new RuntimeException("Exception Occurred")))
                 .concatWith(Flux.just("After Error"))
@@ -24,4 +26,48 @@ public class FluxAndMonoTest {
 
     }
 
+    @Test
+    @DisplayName("Test flux elements for happy path")
+    void fluxTestElementsWithoutError() {
+
+        Flux<String> stringFlux = Flux.just("Spring", "Spring Boot", "Reactive Spring")
+                .log();
+
+        StepVerifier.create(stringFlux)
+                .expectNext("Spring")
+                .expectNext("Spring Boot")
+                .expectNext("Reactive Spring")
+                .verifyComplete(); //Verify Complete is equivalent to subscribe method.
+    }
+
+    @Test
+    @DisplayName("Test flux elements for unhappy path")
+    void fluxTestElementsWithError() {
+
+        Flux<String> stringFlux = Flux.just("Spring", "Spring Boot", "Reactive Spring")
+                .concatWith(Flux.error(new RuntimeException("Exception Occurred")))
+                .log();
+
+        StepVerifier.create(stringFlux)
+                .expectNext("Spring")
+                .expectNext("Spring Boot")
+                .expectNext("Reactive Spring")
+                .expectError(RuntimeException.class) //Expecting an error
+                //.expectErrorMessage("Exception Occurred") //Asserting error message
+                .verify(); //Verify is equivalent to subscribe method.
+    }
+
+    @Test
+    @DisplayName("Test flux elements for unhappy path Variation")
+    void fluxTestElementsWithErrorVariation() {
+
+        Flux<String> stringFlux = Flux.just("Spring", "Spring Boot", "Reactive Spring")
+                .concatWith(Flux.error(new RuntimeException("Exception Occurred")))
+                .log();
+
+        StepVerifier.create(stringFlux)
+                .expectNext("Spring","Spring Boot","Reactive Spring") //One liner assertion
+                .expectError(RuntimeException.class) //Expecting an error
+                .verify();
+    }
 }
